@@ -9,7 +9,8 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::paginate(20); // collection
+        // eager loading users and likes since our model has relationships set
+        $posts = Post::with(['user', 'likes'])->orderBy('id', 'desc')->paginate(20); // collection
 
         return view('posts.index', [
             'posts' => $posts
@@ -34,6 +35,19 @@ class PostController extends Controller
             $request->user()->posts()->create($request->only('body'));
 
             return back();
+    }
+
+    public function destroy(Post $post)
+    {
+
+        if ($post->ownedBy(auth()->user())) {
+            dd('no');
+        }
+        // dd($post->id);
+        // dd($post->body);
+        $post->delete();
+
+        return back();
     }
 
 }
